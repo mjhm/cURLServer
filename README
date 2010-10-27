@@ -1,6 +1,7 @@
 Amazon Web Services EC2 based cURL Server  (Most recent AMI: ami-7e32623b)
 
-(To see detailed documentation.  Launch an instance of the above AMI and go to the Public DNS home page.)
+(To see detailed documentation.  Launch an instance of the above AMI and go to the Public DNS home page.
+or download http://github.com/mjhm/cURLServer/blob/master/cURLServer/var/www/html/index.html and view as HTML.)
 
 The cURL Server is a web based tool that is most useful for patching protocol mismatches for file transfers among web
 services.  For example Google App Engine can't directly read S3 buckets into it's Blobstore.  The cURL Server can patch
