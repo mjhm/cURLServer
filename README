@@ -17,5 +17,6 @@ Key features of the cURL Server are:
 1. Exposes all the functionality of command line cURL (from http://curl.haxx.se) as a web service.
 2. Asynchronous as well as synchronous modes.
 3. Web Client UI for constructing and testing requests.
-4. GAE unit tests and usage examples. (curl_test.py)
-5. Live accessible examples of JSON-RPC requests, python daemon, YUI3 JavaScript tools, request signing, etc.
+4. Nothing to install.  Just start the instance.
+5. GAE unit tests and usage examples. (curl_test.py)
+6. Live accessible examples of JSON-RPC requests, python daemon, YUI3 JavaScript tools, request signing, etc.
