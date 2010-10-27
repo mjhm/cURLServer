@@ -1,0 +1,465 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--
+Copyright (c) 2010 John McLaughlin - Mass Animation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+		<title>cURL Web Client</title>
+    <link type="text/css" rel="stylesheet" href="http://yui.yahooapis.com/3.2.0/build/cssfonts/fonts-min.css" />
+    <script src="http://yui.yahooapis.com/3.2.0/build/yui/yui-min.js"></script>
+    <script src="js/2.0.0-crypto-min.js"></script>
+    <script src="js/2.0.0-crypto-sha1.js"></script>
+    <script src="js/2.0.0-hmac-min.js"></script>
+    <style>
+      .top-invisible {
+        display:none;
+      }
+      .td-left {
+        text-align :right;
+        width: 170px;
+      }
+      .td-right {
+        text-align :left;
+        padding-left: 10px;
+      }
+      .separator {
+        border: 1px solid black;
+      }
+      .call-table {
+        font-weight:bold;
+        border: 1px solid black;
+        width:90%;
+        margin:10px;
+      }    
+      #result-cont {
+        width: 90%;
+        border: 1px solid #999;
+        margin: 2em;
+        background-color: #f2f2f2;
+      }
+      #html-result {
+          border: 1px solid #999;
+          background-color: #fff;
+      }
+    </style>
+    
+<!-- ############  GOOGLE ANALYTICS ######################### -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-9741218-2']);
+      _gaq.push(['_trackPageview']);
+    
+      (function () {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+<!-- ############ END GOOGLE ANALYTICS ##################### -->
+
+	</head>
+  <body class="yui3-skin-sam  yui-skin-sam"> 
+	<div class="top-invisible" style="margin:10px;">
+	  <h1>cURL Web Client</h1>
+    <table>
+      <tr><td class="td-left">cURL Server:</td>
+        <td class="td-right">
+          <span id="curl-server"></span>
+        </td></tr>
+      <tr><td class="td-left">hashkey<br>(usually AWS Private DNS):</td>
+        <td class="td-right">
+          <input id="hashkey" size="80" type="text" name="server" value=""/>
+          <span id="hashkey-example"></span>
+        </td></tr>
+      <tr><td class="td-left">Name of tmpdir:</td>
+        <td class="td-right">
+          <code>/tmp/jsonrpc/ </code>
+          <input id="tmpdir" size="30" type="text" name="tmpdir" value=""/>
+          (Defaults to the process pid.)
+        </td></tr>
+      <tr><td class="td-left">Execution:</td><td class="td-right">
+        <form>
+          <input id="sync" type="radio" name="execution" checked="checked" />Synchronous<span width="10px"></span>
+          <input id="async" type="radio" name="execution" />Asychronous
+        </form></td></tr>
+    </table>
+    <div id='mytabs'>
+      <ul>
+        <li><a href="#curl-tab">cURL</a></li>
+        <li><a href="#utilities-tab">Utilities</a></li>
+      </ul>
+      <div>
+        <div id="curl-tab">
+        <table id="call-curl" class="call-table">
+          <tr><td class="td-left">JSONRPC Call:</td><td class="td-right"><input id="curl-submit-button" type="button" value="curl"/></td></tr>
+          <tr><td class="td-left">Parameters:</td><td class="td-right"><input id="curl_in0" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in1" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in2" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in3" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in4" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in5" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="curl_in6" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left">Presets:<select id="curl-preset-select"></select> </td><td id="curl-preset-desc" class="td-right"></td></tr>
+        </table>
+        </div>
+        <div id="utilities-tab">
+        <table id="call-utilities" class="call-table">
+          <tr><td class="td-left">JSONRPC Call:</td>
+            <td class="td-right">
+              <input id="cat-submit" type="button" value="cat"/>
+              <span style="margin-left:15px;">For "cat" and "listdir" commands, be sure to set an explicit "tmpdir" above.</span>
+            </td></tr>
+          <tr><td class="td-left">cat infile 1</td><td class="td-right"><input id="cat_in0" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left">cat infile 2</td><td class="td-right"><input id="cat_in1" type="text" size="80" value=""/></td></tr>
+          <tr><td class="td-left"></td><td class="td-right">&gt;</td></tr>
+          <tr><td class="td-left">cat outfile</td><td class="td-right"><input id="cat_out" type="text" size="80" value=""/></td></tr>
+          <tr><td colspan="2" class="separator"></td></tr>
+          <tr><td class="td-left">JSONRPC Call:</td><td class="td-right"><input id="listdir_submit" type="button" value="listdir"/></td></tr>
+          <tr><td colspan="2" class="separator"></td></tr>
+          <tr><td class="td-left">JSONRPC Call:</td><td class="td-right"><input id="ping_submit" type="button" value="ping"/></td></tr>
+          <tr><td colspan="2" class="separator"></td></tr>
+          <tr>
+            <td class="td-left"></td>
+            <td class="td-right">
+              <form id="upload-form" method="POST">
+                <input id="jsonrpc-upload" type="hidden" name="jsonrpc" value=""/>
+                <input id="upload-submit" type="button" value="Upload"/>
+                <input id="cat_out" type="file" size="40" name="upload_this" value=""/>
+              </form>
+            </td>
+          </tr>
+          <tr><td colspan="2" class="separator"></td></tr>
+          <tr><td class="td-left"></td><td class="td-right"><input id="diagnostics" type="button" value="Run Diagnostics"/></td></tr>
+        </table>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2> RPC Request Results </h2>
+      <h4>URI:</h4>
+      <pre id="uri">
+      </pre>
+    </div>
+    <div>
+      <h4>Request:</h4>
+      <pre id="request">
+      </pre>
+    </div>
+    <h4>JSON RPC Response:</h4>
+      <pre id="jsonrpc-response"></pre>
+    <div id="result-cont">
+      <h4>Result</h4>
+      <div id="html-result">
+      </div>
+    </div>
+  </div>
+  <script>
+  
+YUI().use('event', 'node', 'io', 'json', 'frame', 'tabview', function (Y) {
+  
+  var test_hashkey = 'ip-10-163-150-100.us-west-1.compute.internal';
+  Y.one('#hashkey-example').set('innerHTML', '(e.g. ' + test_hashkey + ')');
+//  Y.one('#hashkey').set('value', test_hashkey);
+  
+  Y.one('#curl-server').set('innerHTML', document.domain);
+  
+  var tabview = new Y.TabView({srcNode: '#mytabs'});
+  tabview.render();
+ 
+  var responseFrame = new Y.Frame({
+//      content: '<html><body><h3>HTML Result</h3></body></html>'
+    });
+  responseFrame.render('#html-result');
+
+  Y.one('.top-invisible').removeClass('top-invisible');
+  
+//////// RPC COMPLETION EVENT HANDLER /////////////////////
+
+
+  Y.on('io:start', function (id, args) {
+    Y.one('#uri').set('innerHTML', args.uri);
+    Y.one('#request').set('innerHTML', args.request);
+    Y.one('#html-result').set('innerHTML', 'Processing request...'); 
+  });
+
+  Y.on('io:complete', function (id, o, args) {
+    Y.one('#uri').set('innerHTML', args.uri);
+    Y.one('#request').set('innerHTML', args.request);
+    
+    var jsonrpc_response = '';
+    if (o.status == undefined) {
+      jsonrpc_response += 'Status: Not Available\n\n Headers: Not Available\n\n';
+    } else {
+       jsonrpc_response += ('Status: ' + o.status + ', ' + o.statusText + '\n\n' +
+        'Headers:\n' + o.getAllResponseHeaders() + '\n');
+    }
+        
+    
+    var result_text;
+    var response_obj;
+    if (o.responseText === '') {
+      result_text = '';
+      jsonrpc_response += 'Empty JSON result.'
+    }
+    else {
+      try {
+        response_obj = Y.JSON.parse(o.responseText);
+        result_text = response_obj.result;
+        if (!Y.Lang.isString(result_text)) {
+          result_text = Y.JSON.stringify(result_text);
+        }
+        if (result_text.length > 80){
+          response_obj.result = result_text.substr(0,80) + ' ...'
+        }
+        jsonrpc_response += Y.JSON.stringify(response_obj)
+      } catch (e) {
+        result_text = o.responseText;
+        jsonrpc_response += 'Not a JSON result.';
+      }
+    }
+    var frame_result = '';
+    if (result_text.substr(0, 1000).search('\<[hH][tT][mM][lL]') < 0) {
+      frame_result = ('<html><body><pre style="white-space:pre-wrap">' + 
+                      result_text +
+                      '</pre></body></html>');
+      
+    }
+    else {
+      frame_result = result_text;
+    }
+    Y.one('#jsonrpc-response').set('innerHTML', jsonrpc_response);
+    Y.one('#html-result').set('innerHTML', frame_result); 
+  });
+  
+
+  ////////////////// RPC REQUEST SUBMIT HANDLERS ////////////
+   
+  var getUri = function (request, options) {
+    var hashkey = Y.one('#hashkey').get('value');
+    var h = Crypto.HMAC(Crypto.SHA1, request, hashkey, { asBytes: true });
+    var signature = encodeURIComponent(Crypto.util.bytesToBase64(h));
+    
+    var uri = 'http://' + Y.one('#curl-server').get('innerHTML') + '/cgi-bin/jsonrpc.py';
+    uri += '?signature=' + signature;
+    var tmpdir = Y.one('#tmpdir').get('value');
+    if (tmpdir) {
+      uri += '&tmpdir=' + tmpdir;
+    }
+    var async = Y.one('#async').get('checked');
+    if (async) {
+      uri += '&async=1';
+    }
+    if (options !== undefined){
+      uri += options;
+    }
+    uri += '&log=1';
+    return uri;
+  };
+  
+  
+  var id_count = 0;
+  
+  var sendRequest = function (request, options) {
+    var request_str = Y.JSON.stringify(request);
+    var uri = getUri(request_str,options);
+    Y.io(uri, {
+        'method': "POST", 
+        'data': request_str, 
+        'arguments': {request: request_str, uri: uri},
+        'headers': {
+          'Content-Type': 'application/json',
+          'Accept' : 'application/json'
+        }
+      });
+    id_count += 1;
+  };
+
+  // On curl-submit
+  var curlSubmit = function (e) {
+    var params = [];
+    var i;
+    for (i = 0; i < 7; i += 1) {
+      if (Y.one('#curl_in' + i).get('value')) {
+        params.push(Y.one('#curl_in' + i).get('value'));
+      }
+    }
+    sendRequest({
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "curl",
+      "params": params
+    });
+  };
+  
+  Y.on('click', curlSubmit, '#curl-submit-button');
+  Y.on('key', curlSubmit, '#curl-tab input', 'down:13');
+
+  // On cat-submit
+  var catSubmit = function (e) {
+    sendRequest({
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "cat",
+      "params": [Y.one('#cat_in0').get('value'), Y.one('#cat_in1').get('value'), ">", Y.one('#cat_out').get('value')]
+    });
+  };
+  
+  Y.on('click', catSubmit, '#cat-submit');
+  Y.on('key', catSubmit, ['#cat_in0', '#cat_in0', '#cat_out'], 'down:13');
+ 
+  // On listdir_submit
+  Y.on('click', function (e) {
+    sendRequest({
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "listdir"
+    });
+  }, Y.one('#listdir_submit'));
+  
+  
+  
+  // On upload=submit
+  Y.on('click', function (e) {
+    request = {
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "listdir"
+    };
+    var request_str = Y.JSON.stringify(request);
+    Y.one('#jsonrpc-upload').set('value',request_str);
+    var uri = getUri(request_str);
+    Y.io(uri, {
+        'method': "POST", 
+        'data': request_str, 
+        'arguments': {request: request_str, uri: uri},
+        'headers': {
+          'Content-Type': 'application/json',
+          'Accept' : 'application/json'
+        },
+        'form': {
+          'id': 'upload-form',
+          'useDisabled': true,
+          'upload': true
+        }
+      });
+    id_count += 1;
+  }, '#upload-submit');
+  
+  
+  
+  
+  // On ping_submit
+  Y.on('click', function (e) {
+    sendRequest({
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "ping"
+    });
+  }, Y.one('#ping_submit'));
+  
+  // On diagnostics submit
+  Y.on('click', function (e) {
+    sendRequest({
+      "jsonrpc": "2.0",
+      "id": id_count,
+      "method": "ping"
+    },'&diag=1');
+  }, '#diagnostics');
+  
+  
+  ///////  cURL PRESETS ///////////////////////////////////////
+  
+  var curlPresets = {
+    'None': {
+      param: [],
+      description: ''
+    },
+    'cURL version': {
+      param: ['--version'],
+      description: "Curl version string."
+    },
+    'cURL help': {
+      param: ['--help'],
+      description: "Curl command line help."
+    },
+    'AWS metadata': {
+      param: ['http://169.254.169.254/latest/meta-data/ami-id'],
+      description: "Simple test to access AWS metadata.  This example retrieves the AMI ID.  Use this to start up a copy of this server."
+    },
+    'File Get': {
+      param: ['-O', 'http://www.toledorocket.com/perftest/gfx/test2.jpg'],
+      description: ('Test file download to cURL server. You might want to set the "tmpdir" first.  ' +
+          'Courtesy <a href="http://www.toast.net">toast.net</a>.')
+    },
+    'File Post': {
+      param: [
+        '-F', 
+        'file=@test2.jpg;type=text/plain;filename=post_from_curl_server.jpg',
+        'http://www.toledorocket.com/perftest/uploadtest/uploadstatus.asp'
+      ],
+      description: ('Test Post of downloaded file. Make sure you have the "tmpdir" set.  '  +
+          "Otherwise the cURL Server won't know where to look.  " + 
+          "Note name and mimetype are changed for the Post (just because we can).  " + 
+          'Courtesy <a href="http://www.toast.net">toast.net</a>.')
+    },
+    'Google': {
+      param: ['http://www.google.com'],
+      description: "Generic google home page."
+    },
+    'Google Mobile': {
+      param: [
+        '-A',
+        'Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; DROIDX Build/VZW) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17 480X854 motorola DROIDX',
+        'http://www.google.com'
+      ],
+      description: "Google home page for Droid phones. cURL can control header info -- the '-A' passes a USER_AGENT value."
+    }
+  };
+  
+  var preset_option_str = '';
+  Y.each(curlPresets, function (data, label) {
+    preset_option_str += '<option>' + label + '</option>\n';
+  });
+  Y.one('#curl-preset-select').set('innerHTML', preset_option_str);
+  
+  Y.on('change', function (e) {
+    var label = e.target.get('value');
+    var preset = curlPresets[label];
+    Y.one('#curl-preset-desc').set('innerHTML', preset.description);
+    var i = 0;
+    Y.each(preset.param, function (p) {
+      Y.one('#curl_in' + i).set('value', p);
+      i += 1;
+    });
+    while (i < 7) {
+      Y.one('#curl_in' + i).set('value', '');
+      i += 1;
+    }
+  }, '#curl-preset-select');
+  
+ 
+});
+  </script>
+  </body>
+</html>

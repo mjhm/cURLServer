@@ -1,0 +1,617 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--
+Copyright (c) 2010 John McLaughlin - Mass Animation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<html>
+	<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+    <link type="text/css" rel="stylesheet" href="http://yui.yahooapis.com/3.2.0/build/cssfonts/fonts-min.css" />
+    <script src="http://yui.yahooapis.com/3.2.0/build/yui/yui-min.js"></script>
+		<title>cURL Server</title>
+    
+    <style>
+      p.ingres {
+        width: 80%;
+        font-family: arial, helvetica, ariel, sans-serif;
+        font-style: italic;
+        font-size: larger;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .larger {
+        font-size: larger;
+      }
+      .option-table,.command-table {
+        border-collapse:collapse;
+        border: 1px solid black;
+      }
+      .table-left {
+        border: 1px solid black;
+        font-family: monospace;
+        padding: 10px;
+        text-align: right;
+      }
+      .table-right {
+        border: 1px solid black;
+        padding: 10px;
+        text-align: left;
+      }
+      code {
+        white-space: nowrap;
+      }
+      li {
+        margin-top: 2px;
+      }
+    </style>
+    
+<!-- ############  GOOGLE ANALYTICS ######################### -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-9741218-2']);
+      _gaq.push(['_trackPageview']);
+    
+      (function () {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+<!-- ############ END GOOGLE ANALYTICS ##################### -->
+
+  </head>
+  <body class="yui3-skin-sam  yui-skin-sam"> 
+    <div style="margin:10px;">
+  	  <h1 id="main">cURL Server</h1>
+      
+      <div id='mytabs'>
+        <ul>
+          <li><a href="#about-curl-server">About cURL Server</a></li>
+          <li><a href="#about-curl">About cURL</a></li>
+          <li><a href="#curl-web-client">cURL WEB Client</a></li>
+          <li><a href="#reference">cURL Server Reference</a></li>
+          <li><a href="#gae-details">Google App Engine</a></li>
+          <li><a href="#security-privacy">Security and Privacy</a></li>
+          <li><a href="#legal-license">Legal and License</a></li>
+          <li><a href="#code-manifest">Software Manifest</a></li>
+          <li><a href="#contact">Contacts and More Info</a></li>
+        </ul>
+        <div>
+          <div id="about-curl-server">
+            <h3>About cURL Server</h3>
+            <ul>
+              <li>This cURL Server is an AWS Linux instance that can process cURL commands.
+              <ul>
+                <li>The processing protocol is JSONRPC.</li>
+                <li>It has both synchronous and queued asynchronous modes.</li>
+                <li>The core glue technology is all open source, mostly python, and pretty well documented.  
+                See the "Software Manifest" tab for details.</li>
+              </ul>
+              </li>
+              <li>The primary application for a cURL Server is to patch protocol mismatches for transferring files among cloud services.</li>
+              <li>The initial and primary use case (for me) is tranferring S3 files to Google App Engine's Blobstore. Other use cases could include:
+              <ol>
+                <li>Transferring files from an FTP site to S3.</li>
+                <li>Transferring files from an FTP site to GAE Blobstore.</li>
+                <li>Concatenating GAE blobstore files.</li>
+                <li>Fixing mimetypes, filenames, or other manipulations on route to another cloud service.</li>
+                <li>Provide an intermediary between a fast expensive file source, and a slow inexpensive destination. (or vice-versa)</li>
+                <li>Limited (non JavaScript) browser emulation.</li>
+              </ol>
+            </ul>
+            <h3>Quick Start</h3>
+            <ol>
+              <li>If you're unfamiliar with cURL click on the "About cURL" tab, and get a handle on the main cURL documentation.</li>
+              <li>Next view "cURL Web Client" tab.</li>
+              <li>Play with the <a href="curl_web_client.html">client</a>.  Check out the "Presets" to get oriented, 
+              and refer back to the cURL documentation to try out you're own ideas.</li>
+              <li>If you are going to use this with GAE, go to the "GAE Details" tab.  Copy and install the unit test application.</li>
+              <li>If you intend to put this into a production situation, definitely copy it to your own AMI image.  
+              It is very likely that this image will be replaced by a newer AMI in the future.</li>
+            </ol>
+            <h3>What cURL Server is Not</h3>
+            <ol>
+              <li>The cURL Server and the Web Client are not a general user interface for cURL.  The primary role of the Web Client is to test cURL
+              commands and to help programmers construct JSON-RPC requests for the server.</li>
+              <li>The cURL Server is not a public web service.  This is your instance and you can do whatever you want with it, 
+              but it wasn't designed as public user facing application.</li>
+              <li>The cURL Server is not an FTP server.  cURL functions as an FTP client, not a server.  You can certainly install 
+              an FTP server on this instance, but that is beyond the scope of this application.</li>
+              <li>The cURL server is not persistent storage.  In fact all files in <code>/tmp/jsonrpc</code> are automatically 
+              deleted after 24 hours.</li>
+              <li>The installed command line version of curl doesn't have SMTP or POP3 support.  So it can't directly send email.
+              However it would probably be better to implement a separate <code>email</code> method that goes through python's
+              <code>smtplib</code> module.</li>
+            </ol>
+            <h3>Other Cool Stuff</h3>
+            In addition to providing a tool that connects GAE and AWS, 
+            this application also has live working examples of a JSON-RPC server, a python daemon for running the asynchronous queue, matched
+            HMAC/SHA1 signatures between JavaScript and Python, and uses some of the slick tools from the YUI3 JavaScript library.  None of
+            this is earth shattering, but accessible working examples may be useful to some.
+            See the "Software Manifest" tab for more details.
+          </div>
+          
+          
+          <div id="about-curl">
+            <h3 class="pagetitle"> cURL groks URLs </h3> 
+            From the main cURL web site (<a href="http://curl.haxx.se/">http://curl.haxx.se/</a>):
+            <p class="ingres"> 
+              curl is a command line tool for transferring data with URL syntax,
+              supporting DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP,
+              LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and
+              TFTP. curl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading,
+              HTTP form based upload, proxies, cookies, user+password authentication
+              (Basic, Digest, NTLM, Negotiate, kerberos...), file transfer resume, proxy
+              tunneling and a busload of other <a href="http://curl.haxx.se/docs/features.html">useful
+              tricks</a>.
+            </p>
+            <h3>cURL Usage and Documentation</h3>
+            <ul>
+              <li>Of course all of the cURL website documentation was written for the command line version,  
+              but almost all of it applies equally to the cURL Server.</li>
+              <li>Additionally keep in mind that command line <code>curl</code> is installed on this instance.  Just log on to the instance through 
+              PuTTY or other terminal client, and run <code>curl &lt;args&gt;</code></li>
+              <li>Lots of examples are explained in <a href="http://curl.haxx.se/docs/manual.html">http://curl.haxx.se/docs/manual.html</a></li>
+              <li>The main reference documentation is in <a href="http://curl.haxx.se/docs/manpage.html">http://curl.haxx.se/docs/manpage.html</a></li>
+              <li>If you will be using this to upload to GAE, you'll want to read the documentation for the '-F' option carefully.</li>
+            </ul>
+          </div>
+          <div id="curl-web-client">
+            <h2>cURL Web Client</h2>
+            <div>
+              <a href="curl_web_client.html">curl_web_client.html</a> is a web based interface to this cURL Server.  
+              It's main purpose is to test cURL commands and to help you construct JSON-RPC requests for the cURL Server.
+            </div>
+            <h3>Usage</h3>
+            <ol>
+              <li>The first thing you will need is the Private DNS for this instance.  
+              This is used as the hashkey for signing cURL server requests.  You can get this from the AWS control panel 
+              or by running <code>curl http://169.254.169.254/latest/meta-data/local-hostname</code> on the instance command line.
+              See the "Security and Privacy" tab for more information about the signature strategy.</li>
+              <li>You probably want to put in a specific name for <code>tmpdir</code>.  The default behavior is to use the pid of the request's 
+              process as the <code>tmpdir</code>, but this is obviously different for every request.</li>
+              <li>Note also that all files and directories under <code>/tmp/jsonrpc</code> are automatically deleted after 24 hours.</li>
+              <li>Start out selecting cURL options with the "Presets".  Click the "curl" button to run. (BTW. if you have examples
+              of other interesting cURL applications that would be appropiate for the "Presets" please send them to me so that I can include
+              them in a future release.)</li> 
+              <li>Look below the tab frame for your results.  This includes the URI to the server, the JSON-RPC request, 
+              and the result sent back from the server.</li>
+              <li>It's worth noting that the client and the server have the same domain.  Don't be confused by this.  You can send this same
+              request from any web location.  The Web Client just needs to run on the server to avoid JavaScript cross domain AJAX requests.</li>
+              <li>On the "Utilities" tab there are five additional functions that the cURL Server understands, all of which are 
+              mostly self explanatory.</li>
+              <li>"cat" concatenates files in <code>tmpdir</code>, however the method can also be used to view the contents of 
+              a file by leaving the last argument blank.</li>
+              <li>Note also that the actual JSON-RPC <code>cat</code> method can take any number of input files.</li>
+              <li> "Upload" is not an actual JSON-RPC method, but it can be teamed with JSON-RPC requests.  In the Web Client, it is teamed with
+              a "listdir" request.  See the cURL Server Reference tab for details.</li>
+              <li>Switch to Asychronous mode to test the queue.  cURL response objects in asynchronous mode tell you where to look 
+              for the results on the server. You can use "listdir" and "cat" requests to examine those results.</li>
+              <li>The "Run Diagnositics" button will print out a ton of information about the last request.  It should be enough to
+              diagnose most problems, but if it isn't you probably have to crack open a server shell.  Nevertheless the diagnostics should give you 
+              at least a starting place.</li>
+            </ol>
+          </div>
+          <div id="reference">
+            <div>
+              <h3>URI Options</h3>
+              <div>
+                The basic URI has the form:
+                <pre>
+                  http://&lt;Public DNS&gt;/cgi-bin/jsonrpc.py?signature=&lt;signature&gt;&amp;&lt;option1&gt;&amp;&lt;option2&gt;...
+                </pre>
+                <table class="option-table">
+                  <tr>
+                  <td class="table-left">signature<i>(required)</i></td>
+                  <td class="table-right">The <code>signature</code> is computed from the formula (Python):
+                  <pre>
+          import sha, base64, hmac
+          h=hmac.new(hashkey,request_str,sha)
+          signature = base64.b64encode(h.digest()) 
+                  </pre>
+                  Where <code>request_str</code> is the full JSON-RPC request string, and 
+                  <code>hashkey</code> is a string that matches between the client and server.  
+                  The <code>hashkey</code> is currently programmed to be the Private DNS of the AWS Server instance.
+                  However this can be easily changed in <code>/var/www/cgi-bin/jsonrpc.py</code>.
+                  </td>
+                  </tr>
+                  <tr>
+                  <td class="table-left">async <i>(default: 0)</i></td>
+                  <td class="table-right">This directs the request to use asynchronous mode.  The request returns right away with a pointer 
+                  to <code>tmpdir</code> for the request.  No direct completion notices are given, but the user can use cURL commands to 
+                  post custom completion notices.  See the "sequence" call below.</td>
+                  </tr>
+                  <tr>
+                  <td class="table-left">diag <i>(default: 0)</i></td>
+                  <td class="table-right">Runs the diagnostic dump for the last process and the given <code>tmpdir</code>.  
+                  An included JSON-RPC request will be ignored except for the computation of the target signature.</td>
+                  </tr>
+                  <tr>
+                  <td class="table-left">log <i>(default: 0)</i></td>
+                  <td class="table-right">The request and result will be printed to the file <code>jsonrpc.log</code> in the <code>tmpdir</code>.</td>
+                  </tr>
+                  <tr>
+                  <td class="table-left">tmpdir <i>(default: the request handler's process pid)</i></td>
+                  <td class="table-right">This is used as the working directory for the request relative to <code>/tmp/jsonrpc</code>.  
+                  Logging, file uploads, posts, downloads, and concatenations, etc. happen relative to this directory.  
+                  Files and directories below the <code>/tmp/jsonrpc</code> directory are automatically deleted in 24 hours.</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div>
+              <h3>File Uploads</h3>
+              <p>The cURL Server can handle <code>multipart/form-data</code> posts, and files can be directly posted to the cURL Server
+              along with a JSON-RPC request.  
+              For such requests the cURL Server expects one of the parts to be named "jsorpc" and contain the actual JSON-RPC request.
+              This request could be a "ping" or as in the case of the Web Client a "listdir", or it could be a more complex request.
+              If the request is made in asyncronous mode the files are uploaded before the request is queued. </p> 
+              
+              <p>The request form from the Web Client looks something like:</p>
+              <pre>
+&lt;form method="POST" id="upload-form" 
+    action="http://ec2-...us-west-1.compute.amazonaws.com/cgi-bin/jsonrpc.py?signature=...;tmpdir=tmpdir3&amp;async=1&amp;log=1" 
+    enctype="multipart/form-data"&gt;
+  &lt;input type="hidden" value="{&amp;quot;jsonrpc&amp;quot;:&amp;quot;2.0&amp;quot;,&amp;quot;id&amp;quot;:3,&amp;quot;method&amp;quot;:&amp;quot;listdir&amp;quot;}" name="jsonrpc" id="jsonrpc-upload"&gt;
+  &lt;input type="button" value="upload" id="upload-submit"&gt;
+  &lt;input type="file" value="" name="upload_this" size="40" id="cat_out"&gt;
+&lt;/form&gt;
+              </pre>
+              </p>
+            </div>
+            <div>
+              <h3>JSON-RPC Request Methods</h3>
+              <div>
+                <p>
+                  The JSON-RPC request/response format follows the near final proposal: 
+                  <a href="http://groups.google.com/group/json-rpc/web/json-rpc-2-0">JSON-RPC 2.0 Specification</a>.
+                  However for the purposes of this application I recommend caution in using the "batch" form -- for most applications you probably
+                  want to use the "sequence" method instead (see below).  Requests run from a batch array are not guaranteed to run in order,
+                  they don't necessarily share the same tmpdir, and the batch array doesn't have an "id" of its own.  The "sequence" method
+                  addresses these issues.
+                </p>
+                <p>Adding additional methods is straight forward. Just follow the pattern of the existing methods in 
+                <code>/usr/lib/python2.4/site-packages/jsonrpc_procs.py</code></p>
+                <table class="command-table">
+                  <tr>
+                    <td class="table-left">curl</td>
+                    <td class="table-right">Runs the command line curl program through a python subprocess, with the parameter array passed directly
+                    as arguments.  Returns the stdout of the command as a string.</td>
+                  </tr>
+                  <tr>
+                    <td class="table-left">cat</td>
+                    <td class="table-right">This concatenates the file arguments up to the <code>&gt;</code> argument. 
+                    The file specified after the <code>&gt;</code> argument is
+                    the output file.  If <code>&gt;</code> or the output file is missing the result of the 
+                    concatenation is passed to the response return string. 
+                    Note that the <code>&gt;</code> argument is only symbolic, it has no deeper meaning.  
+                    So, for example, don't try replacing it with <code>|</code> to
+                    get some sort of shell piping behavior. </td>
+                  </tr>
+                  <tr>
+                    <td class="table-left">dirlist</td>
+                    <td class="table-right">Lists the current <code>tmpdir</code>.  Result is returned as an array.</td>
+                  </tr>
+                  <tr>
+                    <td class="table-left">ping</td>
+                    <td class="table-right">Returns true.  Useful for checking that the server and/or queue is running.</td>
+                  </tr>
+                  <tr>
+                    <td class="table-left">sequence</td>
+                    <td class="table-right">The parameter list of the sequence method is a list of other JSON-RPC requests.  The sequence method
+                    runs these requests sequentially with the same <code>tmpdir</code>.  The result object is an array of each of the results of the individual
+                    requests.<br/><br/>
+                    Most of the time users will want to use the <code>sequence</code> method with asynchronous requests.  
+                    For example a sequence could have one
+                    or more <code>curl</code> method calls to retrieve files, a <code>cat</code> call to concatentate those files, 
+                    a <code>curl</code> call to upload the
+                    concatenated files, and finally another <code>curl</code> call to send a notification of completion.
+                    This will often take too long for a synchronous operation. 
+                    The example below shows such a compound request.</td>
+                  </tr>
+                </table>
+                <h3>Sequence Example</h3>
+                <pre>
+{ 
+    'jsonrpc': '2.0',
+    'id': 10,
+    'method': 'sequence',
+    'params' : [
+        {
+        'jsonrpc': '2.0',
+        'id': 11,
+        'method': 'curl',
+        'params': [
+                   '-o',
+                   'my_silly_blob',
+                   'http://' + os.environ['SERVER_NAME'] + '/curl_test/data?serve=mytext&key=' + item_key,
+                   '-o',
+                   'my_other_blob',
+                   'http://' + os.environ['SERVER_NAME'] + '/curl_test/data?serve=mytext2&key=' + item_key,
+                   ]
+        },
+        {
+        'jsonrpc': '2.0',
+        'id': 13,
+        'method': 'cat',
+        'params': ['my_silly_blob', 'my_other_blob', '>', 'to_upload']
+        },
+        {
+        'jsonrpc': '2.0',
+        'id': 12,
+        'method': 'curl',
+        'params': ['-F',
+                   ('file=@to_upload;type=text/plain;filename='+upload_as),
+                   blobstore.create_upload_url('/curl_test/finish_upload?key=' + item_key)
+                  ]
+        }
+    ]
+}
+                </pre>
+              </div>
+            </div>
+          </div>
+          <div id="gae-details">
+            <h3>Google App Engine</h3>
+            <p>
+              <a href="http://code.google.com/appengine/">Google App Engine</a> is an extremely functional, powerful, and easy to use 
+              Platform-as-a-Service.  In addition to the GAE Datastore database system, Google also provides a Blobstore system for storing
+              larger unstructured data.  However the Blobstore has a couple of limitations.  Files can only be transferred to the Blobstore
+              via HTTP file post requests, and once uploaded the blobs are not editable.  The cURL Server can be used to work around these
+              limitations.  In particular it can be used to download blobs to files, manipulate those files, and POST the files back to the
+              blobstore.  Potential use cases that have come up in the Google App Engine forums include:
+            </p>
+            <ol>
+              <li>Copying files from S3 to the Blobstore (my primary use case).</li>
+              <li>Copying files from an FTP site to the Blobstore.</li>
+              <li>Changing the mimetype or filename of a file on route to the Blobstore.</li>
+              <li>Combining Blobstore files.</li>
+              <li>Copying files from the GAE datastore to the Blobstore.</li>
+            </ol>
+            <p>
+              The easiest way to understand how to use GAE with the cURL Server is to grab the GAE 
+              <a href="http://github.com/mjhm/cURLServer/blob/master/curl_test.py"><code>curl_test.py</code></a> application file.  
+              Install it within
+              a GAE application, and run the test suites.  Instructions will be on its default page 
+              <code>http://&lt;your_app&gt;.appspot.com/curl_test</code>.
+            </p>
+          </div>
+          <div id="security-privacy">
+          
+            <h3>Privacy</h3>
+            <p>This instance only uses Google Analytics to collect information about the use of the HTML pages on this instance.
+            You can easily remove the Google Analytics sections from the HTML pages without otherwise affecting the operation of the instance.
+            No other information is collected.  In particular I am not monitoring usage of the JSON-RPC server itself, and I have no reason
+            to believe that any of the 3rd party code used, including the "curl" program itself, does any external data collection. 
+ 
+            <h3>Security</h3>
+            <p> Although I can give no warranty about the security of this instance, I have given it some thought.</p>
+            <ul>
+              <li>My security priority for this instance has been to prevent unauthorized users from stealing CPU cycles.  The primary
+              deterrent is that a user must know both the Public DNS (to access the site) and the Private DNS (to use the JSON-RPC server).</li>
+              <li>The Public DNS shouldn't be considered especially secure.</li>
+              <li> On the other hand, obtaining the Private DNS requires access to either 
+              the AWS Control Panel or other AWS account level access, or access to the instance itself.  However AWS uses a limited range
+              of values for the numbers in their Private DNS names.  
+              Therefore a determined hacker could probably crack the instance relatively easily.</li>
+              <li>An easy fix for this is to create a more secure hashkey and put it in the instance startup "user-data".  Code for using the
+              "user-data" instead of the Private DNS is in a few commented lines of <code>/var/www/cgi-bin/jsonrpc.py</code>.  I recommend this
+              change for any serious production usage.
+              <li>I don't recommend using the AWS Tags for storing the hashkey because they require the AWS_SECRET_ACCESS_KEY and AWS_ACCESS_ID
+              to access them.  I prefer avoiding the risk of exposure of this information, because I don't want a breach of security on the instance 
+              to become a breach of security to the whole AWS account.</li>
+              <li>The cURL Server was not designed for secure multi tenant use.  Though it could probably be modified to be so.</li>
+              <li>It's possible that the cURL command line program may have security vulnerabilities that would be exposed by this application.</li>
+              <li>Another easy change would be to implement a "delete" JSON-RPC method in 
+              <code>/usr/lib/python2.4/site-packates/jsonrpc_procs.py</code>.  This would allow users to delete sensitive files immediately
+              after they are used (instead of automatically in 24 hours).  However this is a low priority item for my usage.</li>
+            </ul>
+          </div>
+          <div id="legal-license">
+            <h3>Legal and License</h3>
+            <p>
+            This site primarily uses the MIT (X11) free software license.  Except where otherwise indicated the following applies:
+            </p>
+            <pre>
+Copyright (c) 2010 John McLaughlin - Mass Animation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+            </pre>
+          </div>
+          <div id="code-manifest">
+            <h3>Software Manifest</h3>
+            <p>
+              
+            </p>
+            <table class="command-table">
+              <tr>
+                <td class="table-left">Base AMI: ami-1fdf8e5a</td>
+                <td class="table-right">
+                  <ul>
+                    <li>RightImage_CentOS_5.4_x64_v5.5.9_EBS</li>
+                    <li>Linux version 2.6.21.7-2.fc8xen (mockbuild@xenbuilder4.fedora.phx.redhat.com) 
+                    (gcc version 4.1.2 20070925 (Red Hat 4.1.2-33)) #1 SMP Fri Feb 15 12:34:28 EST 2008</li>
+                    <li>Python 2.4.3</li>
+                    <li>Apache/2.2.3</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">rc.local</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/etc/rc.d</code></li>
+                    <li>Description: Instance init file.  Starts up httpd, and jsonrpc_queue.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">curl</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/usr/bin/curl</code></li>
+                    <li>Description: Command line curl program. <a href="http://curl.haxx.se/"><code>http://curl.haxx.se/</code></a></li>
+                    <li>Version: curl 7.15.5 (x86_64-redhat-linux-gnu) libcurl/7.15.5 OpenSSL/0.9.8b zlib/1.2.3 libidn/0.6.5</li>
+                    <li>License: MIT derivate <a href="http://curl.haxx.se/docs/copyright.html"><code>http://curl.haxx.se/docs/copyright.html</code></a></li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">daemon.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/usr/lib/python2.4/site_packages/</code></li>
+                    <li>Description: Python daemon module. Courtesy Sander Marechal 
+                    <a href="http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/">
+                      <code>http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/</code></a></li>
+                    <li>License: Public Domain</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">jsonrpc_queue.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/etc/jsonrpc_queue.py</code></li>
+                    <li>Description: The daemon executable.  This runs the asynchronous queue, and manages the tmpdir clean up.</li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">jsonrpcbase.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/usr/lib/python2.4/site_packages/jsonrpcbase.py</code></li>
+                    <li>Description: The JSON-RPC processor.  
+                    Courtesy Juhani Åhman (juhani.ahman@cs.helsinki.fi) <a href="http://bitbucket.org/fuzzybyte/jsonrpcbase/downloads">
+                      <code>http://bitbucket.org/fuzzybyte/jsonrpcbase/downloads</code></a></li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">jsonrpc_procs.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/usr/lib/python2.4/site_packages/jsonrpc_procs.py</code></li>
+                    <li>Description: JSON-RPC methods for the cURL Server.</li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">jsonrpc.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/var/www/cgi-bin/jsonrpc.py</code></li>
+                    <li>Description: The HTTP request handler for the cURL Server.</li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">2.0.0-crypto-min.js <br/>2.0.0-crypto-sha1.js <br/>2.0.0-hmac-min.js</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/var/www/html/js</code></li>
+                    <li>Description: "crypto-js" JavaScript cryptographic utilities from 
+                      <a href="http://code.google.com/p/crypto-js/"><code>http://code.google.com/p/crypto-js/</code></a></li>
+                    <li>License: BSD</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">curl_web_client.html</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/var/www/html/curl_web_client.html</code></li>
+                    <li>Description: Web based user interface to the cURL Server.  Primarily for building and testing requests.  
+                    Uses the YUI3 JavaScript library for its AJAX style requests.</li>
+                    <li>License:  MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">index.html</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <code>/var/www/html/index.html</code></li>
+                    <li>Description: This web page.</li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-left">curl_test.py</td>
+                <td class="table-right">
+                  <ul>
+                    <li>Location: <a href="http://github.com/mjhm/cURLServer/blob/master/curl_test.py">
+                      <code>http://github.com/mjhm/cURLServer/blob/master/curl_test.py</code></a></li>
+                    <li>Description: Google App Engine unit tests and examples.</li>
+                    <li>License: MIT</li>
+                  </ul>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div id="contact">
+            <h3>Contacts and More Info</h3>
+            <ul>
+              <li><a href="http://github.com/mjhm/cURLServer">GitHub Project Page</a></li>
+              <li><a href="mailto:johnmclaughlin@massanimation.com">johnmclaughlin@massanimation.com</a></li>
+              <li><a href="mailto:john.mjhm@gmail.com">john.mjhm@gmail.com</a></li>
+              <li><a href="http://www.linkedin.com/pub/john-mclaughlin/a/526/208">LinkedIn</a></li>
+              <li><a href="http://stackoverflow.com/users/400286/mjhm">StackOverflow</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+	<script>
+var YUI;
+YUI().use('event', 'node', 'tabview', function (Y) {
+  Y.one('#main').set('innerHTML', 'cURL Server (' + document.domain + ')');
+  
+  var tabview = new Y.TabView({srcNode: '#mytabs'});
+  tabview.render();
+  
+});
+	</script>
+	</body>
+</html>

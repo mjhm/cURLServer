@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don't
+# want to do the full Sys V style init stuff.
+
+touch /var/lock/subsys/local
+
+httpd -k start
+/etc/jsonrpc_daemon.py stop 
+/etc/jsonrpc_daemon.py start
+
+## Message of the Day -- terminal startup messate.
+cat /etc/motd /etc/motd_append > /etc/motdtmp
+echo Public DNS: >> /etc/motdtmp
+curl http://169.254.169.254/latest/meta-data/public-hostname >> /etc/motdtmp
+echo >> /etc/motdtmp
+echo Private DNS: >> /etc/motdtmp
+curl http://169.254.169.254/latest/meta-data/local-hostname >> /etc/motdtmp
+echo >> /etc/motdtmp
+mv /etc/motdtmp /etc/motd
+
