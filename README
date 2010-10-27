@@ -1,4 +1,4 @@
-Amazon Web Services EC2 based cURL Server  (Most recent AMI: ami-7e32623b)
+Amazon Web Services EC2 based cURL Server  (Most recent AMI: ami-1e32625b)
 
 (To see detailed documentation.  Launch an instance of the above AMI and go to the Public DNS home page.
 or download http://github.com/mjhm/cURLServer/blob/master/cURLServer/var/www/html/index.html and view as HTML.)
