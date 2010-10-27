@@ -1,10 +1,12 @@
 #! /bin/sh
 cd /
-tar -cvf ~/cURLServer.tar etc/rc.d/rc.local etc/jsonrpc_daemon.py
-tar -rvf ~/cURLServer.tar etc/motd_append
-tar -rvf ~/cURLServer.tar var/www/html var/www/cgi-bin
-tar -rvf ~/cURLServer.tar usr/lib/python2.4/site-packages/jsonrpc_procs.py
-tar -rvf ~/cURLServer.tar usr/lib/python2.4/site-packages/jsonrpcbase.py
-tar -rvf ~/cURLServer.tar usr/lib/python2.4/site-packages/daemon.py
-tar -rvf ~/cURLServer.tar ~/bin/archiver
+
+tar -cvf /var/www/html/cURLServer.tar etc/rc.d/rc.local etc/jsonrpc_daemon.py
+tar -rvf /var/www/html/cURLServer.tar etc/motd_append
+tar -rvf /var/www/html/cURLServer.tar var/www/html var/www/cgi-bin
+tar -rvf /var/www/html/cURLServer.tar usr/lib/python2.4/site-packages/jsonrpc_procs.py
+tar -rvf /var/www/html/cURLServer.tar usr/lib/python2.4/site-packages/jsonrpcbase.py
+tar -rvf /var/www/html/cURLServer.tar usr/lib/python2.4/site-packages/daemon.py
+tar -rvf /var/www/html/cURLServer.tar root/bin/archiver
+gzip -f /var/www/html/cURLServer.tar
 
