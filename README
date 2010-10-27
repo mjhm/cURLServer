@@ -1,11 +1,15 @@
-
 Amazon Web Services EC2 based cURL Server  (Most recent AMI: ami-7e32623b)
 
 (To see detailed documentation.  Launch an instance of the above AMI and go to the Public DNS home page.)
 
-The cURL Server is a web based tool that is most useful for patching protocol mismatches for file transfers among web services.  For example Google App Engine can't directly read S3 buckets into it's Blobstore.  The cURL Server can patch this by reading the S3 items into local files and posting those items to the GAE Blobstore.  Since the cURL Server is a web service itself, this can all be done at the direction of the GAE application. 
+The cURL Server is a web based tool that is most useful for patching protocol mismatches for file transfers among web
+services.  For example Google App Engine can't directly read S3 buckets into it's Blobstore.  The cURL Server can patch
+this by reading the S3 items into local files and posting those items to the GAE Blobstore.  Since the cURL Server is a
+web service itself, this can all be done at the direction of the GAE application. 
 
-Although the cURL Server was written with GAE as the most important use case, it is entirely independent of GAE.  Also since the underlying cURL program has so much functionality, I can see a cURL Server instance being used for most any situation where file communication between web services is awkward or impossible.
+Although the cURL Server was written with GAE as the most important use case, it is entirely independent of GAE.  Also
+since the underlying cURL program has so much functionality, I can see a cURL Server instance being used for most any
+situation where file communication between web services is awkward or impossible.
 
 Key features of the cURL Server are:
 
