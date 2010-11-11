@@ -1,10 +1,10 @@
-
 I hereby apologize that this version of the cURL Server...
 
 1. uses an old CentOS Linux version
 2. is stuck on Python2.4
 3. is stuck with cURL 7.15.5
 4. doesn't use mod_python
+5. uses a non standard daemon start up script
 
 feel free to send me any other suggestions that I should apologize for
 and that could possibly be corrected in a future version.
